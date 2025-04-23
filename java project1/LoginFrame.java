@@ -41,7 +41,7 @@ public class LoginFrame extends JFrame {
         for (UserAccount user : users) {
             if (user.getUsername().equals(username) && user.checkPassword(password)) {
                 JOptionPane.showMessageDialog(this, "Login successful");
-                new CarRentalFrame(user, this);
+                new CarRentalFrame(user, this, users);
                 setVisible(false);
                 return;
             }

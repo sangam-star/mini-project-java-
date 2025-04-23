@@ -1,12 +1,13 @@
+import java.util.ArrayList;
+
 public class UserAccount {
     private String username;
     private String password;
-    private String rentedCarId; // Track the rented car ID
+    private ArrayList<Car> rentedCars = new ArrayList<>();
 
     public UserAccount(String username, String password) {
         this.username = username;
         this.password = password;
-        this.rentedCarId = null;
     }
 
     public String getUsername() {
@@ -17,11 +18,18 @@ public class UserAccount {
         return this.password.equals(password);
     }
 
-    public String getRentedCarId() {
-        return rentedCarId;
+    //  Add rented car to list
+    public void addRentedCar(Car car) {
+        rentedCars.add(car);
     }
 
-    public void setRentedCarId(String carId) {
-        this.rentedCarId = carId;
+    // Remove rented car from list
+    public void removeRentedCar(Car car) {
+        rentedCars.remove(car);
+    }
+
+    // Get all rented cars
+    public ArrayList<Car> getRentedCars() {
+        return rentedCars;
     }
 }

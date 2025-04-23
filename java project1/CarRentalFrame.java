@@ -6,14 +6,17 @@ import java.util.ArrayList;
 public class CarRentalFrame extends JFrame {
     private UserAccount user;
     private LoginFrame loginFrame;
+    private ArrayList<UserAccount> allUsers;
     private ArrayList<Car> cars = new ArrayList<>();
     private JTextArea outputArea;
 
-    public CarRentalFrame(UserAccount user, LoginFrame loginFrame) {
+    public CarRentalFrame(UserAccount user, LoginFrame loginFrame, ArrayList<UserAccount> allUsers) {
         this.user = user;
         this.loginFrame = loginFrame;
+        this.allUsers = allUsers;
+
         setTitle("Car Rental - Welcome " + user.getUsername());
-        setSize(600, 400);
+        setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -27,19 +30,51 @@ public class CarRentalFrame extends JFrame {
 
         JButton rentButton = new JButton("Rent a Car");
         JButton returnButton = new JButton("Return a Car");
+        JButton viewRentedButton = new JButton("View My Rented Cars");
+        JButton viewAllRented = new JButton("View All Rented Cars");
         JButton logoutButton = new JButton("Logout");
 
         JPanel panel = new JPanel();
         panel.add(rentButton);
         panel.add(returnButton);
+        panel.add(viewRentedButton);
+        panel.add(viewAllRented);
         panel.add(logoutButton);
 
         add(scrollPane, BorderLayout.CENTER);
         add(panel, BorderLayout.SOUTH);
+        //
 
-        rentButton.addActionListener(e -> rentCar());
-        returnButton.addActionListener(e -> returnCar());
-        logoutButton.addActionListener(e -> logout());
+        rentButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                rentCar();
+            }
+        });
+        
+        returnButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                returnCar();
+            }
+        });
+        
+        viewRentedButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                showMyRentedCars();
+            }
+        });
+        
+        viewAllRented.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                showAllRentedCars();
+            }
+        });
+        
+        logoutButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                logout();
+            }
+        });
+        
 
         setVisible(true);
         showAvailableCars();
@@ -56,17 +91,30 @@ public class CarRentalFrame extends JFrame {
     }
 
     private void rentCar() {
-        if (user.getRentedCarId() != null) {
-            JOptionPane.showMessageDialog(this, "You already have a rented car (ID: " + user.getRentedCarId() + "). Return it first.");
+        // Show the list of available cars
+        StringBuilder availableCarsList = new StringBuilder("Available Cars:\n");
+        for (Car car : cars) {
+            if (car.isAvailable()) {
+                availableCarsList.append(car.getCarId() + " - " + car.getBrand() + " " + car.getModel() + 
+                    String.format(" ($%.2f/day)\n", car.calculatePrice(1)));
+            }
+        }
+    
+        // If no cars are available, inform the user
+        if (availableCarsList.length() == "Available Cars:\n".length()) {
+            JOptionPane.showMessageDialog(this, "No cars are available for rent.");
             return;
         }
-
-        String carId = JOptionPane.showInputDialog(this, "Enter Car ID to rent:");
+    
+        // Show the list and ask for the car ID
+        String carId = JOptionPane.showInputDialog(this, availableCarsList.toString() + "Enter Car ID to rent:");
+    
         if (carId == null) return;
-
+    
+        // Ask for the rental duration
         String daysStr = JOptionPane.showInputDialog(this, "Enter number of rental days:");
         if (daysStr == null) return;
-
+    
         int days;
         try {
             days = Integer.parseInt(daysStr);
@@ -75,52 +123,82 @@ public class CarRentalFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Invalid number of days");
             return;
         }
-
+    
+        // Rent the car if available
         for (Car car : cars) {
             if (car.getCarId().equalsIgnoreCase(carId) && car.isAvailable()) {
-                car.rent(days);
-                user.setRentedCarId(car.getCarId());
+                car.rent(days, user);
+                user.addRentedCar(car);
                 double price = car.calculatePrice(days);
-                JOptionPane.showMessageDialog(this, "Car Rented Successfully\n" +
-                        "User: " + user.getUsername() + "\n" +
-                        "Car: " + car.getBrand() + " " + car.getModel() + "\n" +
-                        "Days: " + days + "\n" +
-                        String.format("Total Price: $%.2f", price));
+                JOptionPane.showMessageDialog(this, "Car rented successfully!\nTotal Price: $" + price);
                 showAvailableCars();
                 return;
             }
         }
+    
+        // If the car ID is invalid or the car is not available
         JOptionPane.showMessageDialog(this, "Car not available or ID invalid");
     }
-
+    
     private void returnCar() {
-        if (user.getRentedCarId() == null) {
-            JOptionPane.showMessageDialog(this, "You haven't rented any car yet.");
+        if (user.getRentedCars().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "You haven't rented any cars yet!");
             return;
         }
-
-        String carId = JOptionPane.showInputDialog(this, "Enter Car ID to return:");
+    
+        StringBuilder rentedList = new StringBuilder("Your Rented Cars:\n");
+        for (Car car : user.getRentedCars()) {
+            rentedList.append(car.getCarId()).append(" - ").append(car.getBrand()).append(" ").append(car.getModel()).append("\n");
+        }
+    
+        String carId = JOptionPane.showInputDialog(this, rentedList + "\nEnter Car ID to return:");
         if (carId == null) return;
-
-        for (Car car : cars) {
-            if (car.getCarId().equalsIgnoreCase(carId) && !car.isAvailable()) {
-                if (!car.getCarId().equals(user.getRentedCarId())) {
-                    JOptionPane.showMessageDialog(this, "You can only return the car you rented (ID: " + user.getRentedCarId() + ").");
-                    return;
-                }
-                int days = car.getRentedDays();
+    
+        for (Car car : user.getRentedCars()) {
+            if (car.getCarId().equalsIgnoreCase(carId)) {
                 car.returnCar();
-                user.setRentedCarId(null);
-                JOptionPane.showMessageDialog(this, "Car Returned Successfully\n" +
-                        "User: " + user.getUsername() + "\n" +
-                        "Car: " + car.getBrand() + " " + car.getModel() + "\n" +
-                        "Rented Days: " + days);
+                user.removeRentedCar(car);
+                JOptionPane.showMessageDialog(this, "Car returned successfully!");
                 showAvailableCars();
                 return;
             }
         }
+    
         JOptionPane.showMessageDialog(this, "Car is not rented or invalid ID");
     }
+    
+
+    private void showMyRentedCars() {
+        if (user.getRentedCars().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "You haven't rented any cars yet!");
+            return;
+        }
+    
+        outputArea.setText("Your Rented Cars:\n");
+        for (Car car : user.getRentedCars()) {
+            outputArea.append(car.getCarId() + " - " + car.getBrand() + " " + car.getModel() + "\n");
+        }
+    }
+    
+    
+    private void showAllRentedCars() {
+        boolean anyRented = false;
+        outputArea.setText("All Rented Cars:\n");
+    
+        for (UserAccount u : allUsers) {
+            for (Car car : u.getRentedCars()) {
+                outputArea.append("User: " + u.getUsername() + " | Car: " + car.getCarId() + " - " + car.getBrand() + " " + car.getModel() + "\n");
+                anyRented = true;
+            }
+        }
+    
+        if (!anyRented) {
+            JOptionPane.showMessageDialog(this, "No cars are currently rented by any user.");
+            outputArea.setText(""); // clear the area since there's nothing to show
+        }
+    }
+    
+    
 
     private void logout() {
         dispose();

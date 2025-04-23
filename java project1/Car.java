@@ -5,6 +5,7 @@ public class Car {
     private double basePricePerDay;
     private boolean isAvailable;
     private int rentedDays;
+    private UserAccount rentedBy; // NEW: to track who rented the car
 
     public Car(String carId, String brand, String model, double basePricePerDay) {
         this.carId = carId;
@@ -13,6 +14,7 @@ public class Car {
         this.basePricePerDay = basePricePerDay;
         this.isAvailable = true;
         this.rentedDays = 0;
+        this.rentedBy = null;
     }
 
     public String getCarId() {
@@ -35,17 +37,24 @@ public class Car {
         return basePricePerDay * rentalDays;
     }
 
-    public void rent(int days) {
+    // Updated to accept UserAccount
+    public void rent(int days, UserAccount user) {
         isAvailable = false;
         rentedDays = days;
+        rentedBy = user;
     }
 
     public void returnCar() {
         isAvailable = true;
         rentedDays = 0;
+        rentedBy = null;
     }
 
     public int getRentedDays() {
         return rentedDays;
+    }
+
+    public UserAccount getRentedBy() {
+        return rentedBy;
     }
 }
