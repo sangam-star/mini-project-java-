@@ -3,8 +3,7 @@ This is a beginner-friendly Java Swing GUI application for a Car Rental System. 
 
 ## 📸 Preview
 
-> 💡 Save your screenshots inside an `images/` folder and make sure to commit them with your project!
-
+>  
 ### 🔐 Login and Signup
 ![Login Screen](screenshots/ss1.png)
 
