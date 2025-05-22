@@ -54,8 +54,18 @@ View rented cars → See your list
 
 View all rented cars → See what others have rented too
 
-📸 Screenshots
-Not included yet — you can add screenshots here of the login screen, rent form, and list views!
+## 📸 Screenshots
+
+> 💡 Save your screenshots inside an `images/` folder and make sure to commit them with your project!
+
+### 🔐 Login and Signup
+![Login Screen](screenshots/ss1.png.png)
+
+### 🏠 Main Dashboard
+![Dashboard]( screenshots/ss2.png.png)
+
+ 
+
 
 📚 Concepts Used
 Classes & Objects
