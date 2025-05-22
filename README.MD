@@ -59,10 +59,10 @@ View all rented cars → See what others have rented too
 > 💡 Save your screenshots inside an `images/` folder and make sure to commit them with your project!
 
 ### 🔐 Login and Signup
-![Login Screen](screenshots/ss1.png.png)
+![Login Screen](screenshots/ss1.png)
 
 ### 🏠 Main Dashboard
-![Dashboard]( screenshots/ss2.png.png)
+![Dashboard]( screenshots/ss2.png)
 
  
 
